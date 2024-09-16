@@ -1,34 +1,30 @@
-name: build-and-push-image
+name: Build and Push Docker Image
 
-on: workflow_dispatch
-permissions:
-      id-token: write
-      contents: read
-env:
-  registryName: ${{ vars.REGISTRY_NAME }}
-  repositoryName: ${{ vars.REPOSITORY_NAME }}
-  tag: ${{ vars.TAG }}
+on:
+  push:
+    branches:
+      - main
 
 jobs:
-
-  build:
-
+  build-and-push:
     runs-on: ubuntu-latest
 
     steps:
-    - name: 'Az CLI login'
-      uses: azure/login@v2
-      with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          
-    - name: 'Login to Specified ACR'
-      run: az acr login -n $registryName
-      
-    - uses: actions/checkout@v3
-    - name: Build the Docker Image
-      run: docker build . --file Dockerfile --tag "$registryName.azurecr.io/$repositoryName:$tag"
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-    - name: 'Push the Docker Image'
-      run: docker push "$registryName.azurecr.io/$repositoryName:$tag"
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3.6.1
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3.3.0
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v6.7.0
+      with:
+        context: .
+        push: true
+        tags:  aichehda/deployment-environments/runners/terraform:latest
