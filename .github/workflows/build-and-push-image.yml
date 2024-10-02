@@ -22,9 +22,33 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+    - name: Get latest Terraform version
+      id: get-terraform-version
+      # echo ::set-output name=terraform_version::$(curl -s https://api.github.com/repos/hashicorp/terraform/releases/latest | jq -r .tag_name)
+      run: |
+        set -e
+
+        # Function to get all available Terraform versions
+        available_versions=$(curl -s https://releases.hashicorp.com/terraform/ | grep -oP 'terraform_[^<]+' | cut -d '_' -f 2 | sort -V)
+
+        # Filter out alpha and beta versions
+        filtered_versions=$(echo "$available_versions" | grep -v -E 'alpha|beta|rc')
+
+        # Get the most recent stable version
+        latest_version=$(echo "$filtered_versions" | tail -n 1)
+
+        echo $latest_version
+
+        echo "terraform-version=$latest_version" >> "$GITHUB_OUTPUT"
+
+
     - name: Build and push Docker image
       uses: docker/build-push-action@v6
       with:
         context: .
         push: true
-        tags: ${{ secrets.DOCKER_USERNAME }}/${{ github.event.repository.name }}:1.9.3
+        build-args: |
+          TERRAFORM_VERSION=${{ steps.get-terraform-version.outputs.terraform-version }}
+        tags: |
+          ${{ secrets.DOCKER_USERNAME }}/${{ github.event.repository.name }}:1.9.3
+          ${{ secrets.DOCKER_USERNAME }}/${{ github.event.repository.name }}:latest
