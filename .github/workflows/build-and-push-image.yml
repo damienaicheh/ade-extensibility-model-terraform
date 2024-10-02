@@ -41,9 +41,6 @@ jobs:
 
         echo "terraform-version=$latest_version" >> "$GITHUB_OUTPUT"
 
-    - name: Get latest Terraform version
-      run: echo ${{ steps.get-terraform-version.outputs.terraform-version }}
-
     - name: Build and push Docker image
       uses: docker/build-push-action@v6
       with:
