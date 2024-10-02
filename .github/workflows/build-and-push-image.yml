@@ -49,5 +49,5 @@ jobs:
         build-args: |
           TERRAFORM_VERSION=${{ steps.get-terraform-version.outputs.terraform-version }}
         tags: |
-          ${{ secrets.DOCKER_USERNAME }}/${{ github.event.repository.name }}:1.9.3
+          ${{ secrets.DOCKER_USERNAME }}/${{ github.event.repository.name }}:${{ steps.get-terraform-version.outputs.terraform-version }}
           ${{ secrets.DOCKER_USERNAME }}/${{ github.event.repository.name }}:latest
