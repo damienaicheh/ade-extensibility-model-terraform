@@ -5,7 +5,7 @@ ARG BASE_IMAGE=mcr.microsoft.com/deployment-environments/runners/core
 ARG IMAGE_VERSION=latest
 FROM ${BASE_IMAGE}:${IMAGE_VERSION}
 
-ARG TERRAFORM_VERSION=1.0.0
+ARG TERRAFORM_VERSION
 
 WORKDIR /
 
